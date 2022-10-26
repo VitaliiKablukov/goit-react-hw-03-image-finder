@@ -5,7 +5,8 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { WrapperApp } from './App.styled';
 import { Loader } from './Loader/Loader';
 import { Button } from './Button/Button';
-import { Modal } from './Modal/Modal.styled';
+import { Modal } from './Modal/Modal';
+
 export class App extends Component {
   state = {
     picture: [],
@@ -28,6 +29,7 @@ export class App extends Component {
   counterPage = () => {
     this.setState(prevState => ({ page: (prevState.page += 1) }));
   };
+
   async componentDidUpdate(prevProps, prevState) {
     try {
       if (
@@ -38,28 +40,32 @@ export class App extends Component {
           `https://pixabay.com/api/?q=${this.state.inputText}&page=${this.state.page}&key=29826556-a4f91074fca654992db1f732d&image_type=photo&orientation=horizontal&per_page=12`
         );
         const pictures = response.data.hits;
-        console.log(pictures);
         if (!pictures.length) {
           alert('Упс, по вашому запиту картинки не знайдені');
+          this.setState(() => ({ loading: false }));
         } else {
           this.setState(prevState => ({
             picture: [...prevState.picture, ...pictures],
             totalHits: response.data.totalHits,
+            loading: false,
           }));
         }
       }
     } catch (error) {
       console.log(error);
-    } finally {
-      this.setState({ loading: false });
+      this.setState(() => ({ loading: false }));
     }
   }
   openModal = e => {
     const srcPicture = e.target.alt;
-    console.log(srcPicture);
     this.setState(() => ({
-      showModal: true,
       modalPicture: srcPicture,
+    }));
+    this.toggleModal();
+  };
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
     }));
   };
   render() {
@@ -78,7 +84,9 @@ export class App extends Component {
         {totalHits && totalHits !== picture.length && (
           <Button counterPage={this.counterPage} />
         )}
-        {showModal && <Modal picture={modalPicture} />}
+        {showModal && (
+          <Modal picture={modalPicture} onClose={this.toggleModal} />
+        )}
       </WrapperApp>
     );
   }
