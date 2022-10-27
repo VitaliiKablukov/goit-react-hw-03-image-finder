@@ -48,6 +48,7 @@ export class App extends Component {
         totalHits: response.data.totalHits,
       }));
     }
+    this.setState(() => ({ loading: false }));
   };
   componentDidUpdate(prevProps, prevState) {
     if (
@@ -56,7 +57,6 @@ export class App extends Component {
     ) {
       const { inputText, page } = this.state;
       this.fetchImages(inputText, page);
-      this.setState(() => ({ loading: false }));
     }
   }
 
