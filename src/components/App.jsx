@@ -35,23 +35,18 @@ export class App extends Component {
       prevState.page !== this.state.page
     ) {
       try {
-        if (
-          prevState.inputText !== this.state.inputText ||
-          prevState.page !== this.state.page
-        ) {
-          this.setState(() => ({ loading: true }));
-          const response = await axios.get(
-            `https://pixabay.com/api/?q=${this.state.inputText}&page=${this.state.page}&key=29826556-a4f91074fca654992db1f732d&image_type=photo&orientation=horizontal&per_page=12`
-          );
-          const pictures = response.data.hits;
-          if (!pictures.length) {
-            alert('Упс, по вашому запиту картинки не знайдені');
-          } else {
-            this.setState(prevState => ({
-              picture: [...prevState.picture, ...pictures],
-              totalHits: response.data.totalHits,
-            }));
-          }
+        this.setState(() => ({ loading: true }));
+        const response = await axios.get(
+          `https://pixabay.com/api/?q=${this.state.inputText}&page=${this.state.page}&key=29826556-a4f91074fca654992db1f732d&image_type=photo&orientation=horizontal&per_page=12`
+        );
+        const pictures = response.data.hits;
+        if (!pictures.length) {
+          alert('Упс, по вашому запиту картинки не знайдені');
+        } else {
+          this.setState(prevState => ({
+            picture: [...prevState.picture, ...pictures],
+            totalHits: response.data.totalHits,
+          }));
         }
       } catch (error) {
         console.log(error);
