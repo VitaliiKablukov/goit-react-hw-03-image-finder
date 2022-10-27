@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Component } from 'react';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
@@ -6,7 +5,7 @@ import { WrapperApp } from './App.styled';
 import { Loader } from './Loader/Loader';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
-
+import { RequesPictures } from '../components/Services/ServicesApi';
 export class App extends Component {
   state = {
     picture: [],
@@ -28,36 +27,42 @@ export class App extends Component {
   counterPage = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
-
-  async componentDidUpdate(prevProps, prevState) {
+  fetchImages = async (query, pages) => {
+    this.setState(() => ({ loading: true }));
+    const response = await RequesPictures(query, pages);
+    const pictures = response.data.hits;
+    const aryyPictures = pictures.map(elem => {
+      const picture = {
+        id: elem.id,
+        webformatURL: elem.webformatURL,
+        largeImageURL: elem.largeImageURL,
+        tags: elem.tags,
+      };
+      return picture;
+    });
+    if (!pictures.length) {
+      alert('Упс, по вашому запиту картинки не знайдені');
+    } else {
+      this.setState(prevState => ({
+        picture: [...prevState.picture, ...aryyPictures],
+        totalHits: response.data.totalHits,
+      }));
+    }
+  };
+  componentDidUpdate(prevProps, prevState) {
     if (
       prevState.inputText !== this.state.inputText ||
       prevState.page !== this.state.page
     ) {
-      try {
-        this.setState(() => ({ loading: true }));
-        const response = await axios.get(
-          `https://pixabay.com/api/?q=${this.state.inputText}&page=${this.state.page}&key=29826556-a4f91074fca654992db1f732d&image_type=photo&orientation=horizontal&per_page=12`
-        );
-        const pictures = response.data.hits;
-        if (!pictures.length) {
-          alert('Упс, по вашому запиту картинки не знайдені');
-        } else {
-          this.setState(prevState => ({
-            picture: [...prevState.picture, ...pictures],
-            totalHits: response.data.totalHits,
-          }));
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        this.setState(() => ({ loading: false }));
-      }
+      const { inputText, page } = this.state;
+      this.fetchImages(inputText, page);
+      this.setState(() => ({ loading: false }));
     }
   }
 
   openModal = e => {
-    const srcPicture = e.target.alt;
+    const srcPicture = e.target.name;
+
     this.setState(() => ({
       modalPicture: srcPicture,
     }));
