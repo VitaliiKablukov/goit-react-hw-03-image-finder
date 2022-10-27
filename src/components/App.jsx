@@ -28,7 +28,7 @@ export class App extends Component {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
   fetchImages = async (query, pages) => {
-    
+    this.setState(() => ({ loading: true }));
     const response = await RequesPictures(query, pages);
     const pictures = response.data.hits;
     const aryyPictures = pictures.map(elem => {
@@ -54,7 +54,6 @@ export class App extends Component {
       prevState.inputText !== this.state.inputText ||
       prevState.page !== this.state.page
     ) {
-      this.setState(() => ({ loading: true }));
       const { inputText, page } = this.state;
       this.fetchImages(inputText, page);
       this.setState(() => ({ loading: false }));
